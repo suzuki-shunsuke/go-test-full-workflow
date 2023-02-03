@@ -1,0 +1,182 @@
+---
+name: test
+
+on:
+  workflow_call:
+    inputs:
+      aqua_policy_config:
+        required: false
+        type: string
+      aqua_version:
+        required: true
+        type: string
+      go-version:
+        required: true
+        type: string
+    secrets:
+      gh_app_id:
+        required: false
+      gh_app_private_key:
+        required: false
+
+env:
+  AQUA_POLICY_CONFIG: ${{inputs.aqua_policy_config}}
+  AQUA_LOG_COLOR: always
+
+permissions: {}
+
+jobs:
+  path-filter:
+    # Get changed files to filter jobs
+    outputs:
+      update-aqua-checksums: ${{steps.changes.outputs.update-aqua-checksums}}
+      renovate-config-validator: ${{steps.changes.outputs.renovate-config-validator}}
+      ghalint: ${{steps.changes.outputs.ghalint}}
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read # To get pull requests of private repository
+    steps:
+      - uses: dorny/paths-filter@4512585405083f25c027a35db413c2b3b9006d50 # v2.11.1
+        id: changes
+        with:
+          filters: |
+            update-aqua-checksums:
+              - aqua.yaml
+              - aqua/*.yaml
+              - aqua-checksums.json
+              - aquaproj/aqua.yaml
+              - aquaproj/imports/*.yaml
+              - aquaproj/aqua-checksums.json
+            renovate-config-validator:
+              - renovate.json5
+            ghalint:
+              - .github/workflows/*.yaml
+              - aqua/ghalint.yaml
+              - aquaproj/imports/ghalint.yaml
+
+  update-aqua-checksums:
+    # Update aqua-checksums.json and push a commit
+    runs-on: ubuntu-latest
+    needs: path-filter
+    permissions:
+      contents: read # To checkout private repository
+    if: |
+      needs.path-filter.outputs.update-aqua-checksums == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3
+      - name: Generate token
+        id: generate_token
+        if: "! github.event.pull_request.head.repo.fork"
+        uses: tibdex/github-app-token@021a2405c7f990db57f5eae5397423dcc554159c # v1
+        with:
+          app_id: ${{secrets.gh_app_id}}
+          private_key: ${{secrets.gh_app_private_key}}
+      - uses: aquaproj/aqua-installer@61e2563dfe7674cbf74fe6ec212e444198a3bb00 # v2.0.2
+        # Install ghcp
+        with:
+          aqua_version: ${{inputs.aqua_version}}
+        env:
+          AQUA_GITHUB_TOKEN: ${{github.token}}
+      - uses: aquaproj/update-checksum-action@4bb09f359f2ecdb20aa9bc61684f5f9d185be909 # v0.1.4
+        with:
+          prune: true
+          skip_push: ${{github.event.pull_request.head.repo.fork}}
+        env:
+          # To trigger GitHub Actions Workflow by pushing a commit, GitHub App token is required.
+          # github.token doesn't trigger GitHub Actions Workflow.
+          # https://docs.github.com/en/actions/security-guides/automatic-token-authentication#using-the-github_token-in-a-workflow
+          # > When you use the repository's GITHUB_TOKEN to perform tasks, events triggered by the GITHUB_TOKEN, with the exception of workflow_dispatch and repository_dispatch, will not create a new workflow run.
+          GITHUB_TOKEN: ${{steps.generate_token.outputs.token}}
+
+  renovate-config-validator:
+    # Validate Renovate Configuration by renovate-config-validator.
+    uses: suzuki-shunsuke/renovate-config-validator-workflow/.github/workflows/validate.yaml@1a2fd7b15d99b1c434124b0bd2d8bd55b54ed869 # v0.2.0
+    needs: path-filter
+    if: needs.path-filter.outputs.renovate-config-validator == 'true'
+    permissions:
+      contents: read
+
+  ghalint:
+    # Validate GitHub Actions Workflows by ghalint.
+    needs: path-filter
+    if: needs.path-filter.outputs.ghalint == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3
+      - uses: aquaproj/aqua-installer@61e2563dfe7674cbf74fe6ec212e444198a3bb00 # v2.0.2
+        with:
+          aqua_version: ${{inputs.aqua_version}}
+        env:
+          AQUA_GITHUB_TOKEN: ${{github.token}}
+      - run: ghalint run
+        env:
+          GHALINT_LOG_COLOR: always
+
+  enable-automerge:
+    # Enable automerge to merge pull requests from Renovate automatically.
+    runs-on: ubuntu-latest
+    needs:
+      - status-check
+    permissions: {}
+    # "! failure() && ! cancelled()" is required. success() returns false if dependent jobs are skipped. https://github.com/community/community/discussions/45058
+    # By default success() is used so we have to override success() by "! failure() && ! cancelled()"
+    if: |
+      ! failure() && ! cancelled() && github.event.pull_request.user.login == 'renovate[bot]' && contains(github.event.pull_request.body, ' **Automerge**: Enabled.')
+    steps:
+      - name: Generate token
+        id: generate_token
+        uses: tibdex/github-app-token@021a2405c7f990db57f5eae5397423dcc554159c # v1
+        with:
+          app_id: ${{secrets.gh_app_id}}
+          private_key: ${{secrets.gh_app_private_key}}
+      - run: gh -R "$GITHUB_REPOSITORY" pr merge --merge --auto --delete-branch "$PR_NUMBER"
+        env:
+          GITHUB_TOKEN: ${{steps.generate_token.outputs.token}} # Use GitHub App to trigger GitHub Actions Workflow by merge commit.
+          PR_NUMBER: ${{github.event.pull_request.number}}
+
+  status-check:
+    # This job is used for main branch's branch protection rule's status check.
+    # If all dependent jobs succeed or are skipped this job succeeds.
+    runs-on: ubuntu-latest
+    needs:
+      - update-aqua-checksums
+      - test
+      - test_fork
+      - renovate-config-validator
+      - ghalint
+    permissions: {}
+    if: failure()
+    steps:
+      - run: exit 1
+
+  test:
+    uses: suzuki-shunsuke/go-test-workflow/.github/workflows/test.yaml@2bdeeb26dac484af74f203a6eca9e7784a29f48c # v0.3.1
+    if: "! github.event.pull_request.head.repo.fork"
+    with:
+      aqua_version: ${{inputs.aqua_version}}
+      aqua_policy_config: ${{inputs.aqua_policy_config}}
+    permissions:
+      pull-requests: write
+      contents: read
+
+  test_fork:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.head.repo.fork
+    permissions: {}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3
+      - uses: actions/setup-go@6edd4406fa81c3da01a34fa6f6343087c207a568 # v3.5.0
+        with:
+          go-version: ${{inputs.go-version}}
+          cache: true
+      - uses: aquaproj/aqua-installer@61e2563dfe7674cbf74fe6ec212e444198a3bb00 # v2.0.2
+        with:
+          aqua_version: ${{inputs.aqua_version}}
+        env:
+          AQUA_GITHUB_TOKEN: ${{github.token}}
+      - run: golangci-lint run
+      - run: go test -v ./... -race -covermode=atomic
