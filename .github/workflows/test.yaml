@@ -153,7 +153,7 @@ jobs:
       - run: exit 1
 
   test:
-    uses: suzuki-shunsuke/go-test-workflow/.github/workflows/test.yaml@2bdeeb26dac484af74f203a6eca9e7784a29f48c # v0.3.1
+    uses: suzuki-shunsuke/go-test-workflow/.github/workflows/test.yaml@974c826cf99fff2f29b317a45713e2d5731a0c32 # v0.4.0
     if: "! github.event.pull_request.head.repo.fork"
     with:
       aqua_version: ${{inputs.aqua_version}}
