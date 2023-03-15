@@ -47,15 +47,15 @@ jobs:
               - aqua.yaml
               - aqua/*.yaml
               - aqua-checksums.json
-              - aquaproj/aqua.yaml
-              - aquaproj/imports/*.yaml
-              - aquaproj/aqua-checksums.json
+              - aqua/aqua.yaml
+              - aqua/imports/*.yaml
+              - aqua/aqua-checksums.json
             renovate-config-validator:
               - renovate.json5
             ghalint:
               - .github/workflows/*.yaml
               - aqua/ghalint.yaml
-              - aquaproj/imports/ghalint.yaml
+              - aqua/imports/ghalint.yaml
 
   update-aqua-checksums:
     # Update aqua-checksums.json and push a commit
