@@ -12,11 +12,11 @@ on:
 permissions: {}
 jobs:
   test:
-    uses: suzuki-shunsuke/go-test-full-workflow/.github/workflows/test.yaml@def1c74d2b672eaedf25e43b2284f0ab09f345be # v0.1.1
+    uses: suzuki-shunsuke/go-test-full-workflow/.github/workflows/test.yaml@0b7604aaf8c1b30f7b9cd2d79687daf39856b3f8 # v0.1.3
     with:
       aqua_policy_config: aqua-policy.yaml
-      aqua_version: v1.32.3
-      go-version: 1.19.5
+      aqua_version: v1.36.0
+      go-version: 1.20.2
     secrets:
       gh_app_id: ${{secrets.APP_ID}}
       gh_app_private_key: ${{secrets.APP_PRIVATE_KEY}}
