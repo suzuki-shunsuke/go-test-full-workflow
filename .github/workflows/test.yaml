@@ -16,10 +16,6 @@ on:
       golangci-lint-timeout:
         required: false
         type: string
-      go-mod-tidy:
-        required: false
-        default: false
-        type: boolean
     secrets:
       gh_app_id:
         required: false
@@ -107,7 +103,6 @@ jobs:
 
   go-mod-tidy:
     uses: suzuki-shunsuke/go-mod-tidy-workflow/.github/workflows/go-mod-tidy.yaml@8facac38f5b2008648c14e31c632c3a709439b9c # v0.1.1
-    if: inputs.go-mod-tidy
     with:
       go-version: ${{inputs.go-version}}
       aqua_version: ${{inputs.aqua_version}}
