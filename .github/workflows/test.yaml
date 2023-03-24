@@ -35,6 +35,7 @@ jobs:
       update-aqua-checksums: ${{steps.changes.outputs.update-aqua-checksums}}
       renovate-config-validator: ${{steps.changes.outputs.renovate-config-validator}}
       ghalint: ${{steps.changes.outputs.ghalint}}
+      go-mod-tidy: ${{steps.changes.outputs.go-mod-tidy}}
     runs-on: ubuntu-latest
     permissions:
       pull-requests: read # To get pull requests of private repository
@@ -56,6 +57,35 @@ jobs:
               - .github/workflows/*.yaml
               - aqua/ghalint.yaml
               - aqua/imports/ghalint.yaml
+            go-mod-tidy:
+              - go.mod
+              - go.sum
+              - "**.go"
+
+  status-check:
+    # This job is used for main branch's branch protection rule's status check.
+    # If all dependent jobs succeed or are skipped this job succeeds.
+    runs-on: ubuntu-latest
+    needs:
+      - update-aqua-checksums
+      - test
+      - renovate-config-validator
+      - ghalint
+      - go-mod-tidy
+    permissions: {}
+    if: |
+      ! failure() && ! cancelled() && github.event.pull_request.user.login == 'renovate[bot]' && contains(github.event.pull_request.body, ' **Automerge**: Enabled.')
+    steps:
+      - name: Generate token
+        id: generate_token
+        uses: tibdex/github-app-token@021a2405c7f990db57f5eae5397423dcc554159c # v1
+        with:
+          app_id: ${{secrets.gh_app_id}}
+          private_key: ${{secrets.gh_app_private_key}}
+      - run: gh -R "$GITHUB_REPOSITORY" pr merge --merge --auto --delete-branch "$PR_NUMBER"
+        env:
+          GITHUB_TOKEN: ${{steps.generate_token.outputs.token}} # Use GitHub App to trigger GitHub Actions Workflow by merge commit.
+          PR_NUMBER: ${{github.event.pull_request.number}}
 
   update-aqua-checksums:
     # Update aqua-checksums.json and push a commit
@@ -71,6 +101,19 @@ jobs:
     secrets:
       gh_app_id: ${{secrets.gh_app_id}}
       gh_app_private_key: ${{secrets.gh_app_private_key}}
+
+  go-mod-tidy:
+    uses: suzuki-shunsuke/go-mod-tidy-workflow/.github/workflows/go-mod-tidy.yaml@8facac38f5b2008648c14e31c632c3a709439b9c # v0.1.1
+    needs: path-filter
+    if: needs.path-filter.outputs.go-mod-tidy == 'true'
+    with:
+      go-version: ${{inputs.go-version}}
+      aqua_version: ${{inputs.aqua_version}}
+    secrets:
+      gh_app_id: ${{secrets.gh_app_id}}
+      gh_app_private_key: ${{secrets.gh_app_private_key}}
+    permissions:
+      contents: read
 
   renovate-config-validator:
     # Validate Renovate Configuration by renovate-config-validator.
@@ -97,42 +140,6 @@ jobs:
       - run: ghalint run
         env:
           GHALINT_LOG_COLOR: always
-
-  enable-automerge:
-    # Enable automerge to merge pull requests from Renovate automatically.
-    runs-on: ubuntu-latest
-    needs:
-      - status-check
-    permissions: {}
-    # "! failure() && ! cancelled()" is required. success() returns false if dependent jobs are skipped. https://github.com/community/community/discussions/45058
-    # By default success() is used so we have to override success() by "! failure() && ! cancelled()"
-    if: |
-      ! failure() && ! cancelled() && github.event.pull_request.user.login == 'renovate[bot]' && contains(github.event.pull_request.body, ' **Automerge**: Enabled.')
-    steps:
-      - name: Generate token
-        id: generate_token
-        uses: tibdex/github-app-token@021a2405c7f990db57f5eae5397423dcc554159c # v1
-        with:
-          app_id: ${{secrets.gh_app_id}}
-          private_key: ${{secrets.gh_app_private_key}}
-      - run: gh -R "$GITHUB_REPOSITORY" pr merge --merge --auto --delete-branch "$PR_NUMBER"
-        env:
-          GITHUB_TOKEN: ${{steps.generate_token.outputs.token}} # Use GitHub App to trigger GitHub Actions Workflow by merge commit.
-          PR_NUMBER: ${{github.event.pull_request.number}}
-
-  status-check:
-    # This job is used for main branch's branch protection rule's status check.
-    # If all dependent jobs succeed or are skipped this job succeeds.
-    runs-on: ubuntu-latest
-    needs:
-      - update-aqua-checksums
-      - test
-      - renovate-config-validator
-      - ghalint
-    permissions: {}
-    if: failure()
-    steps:
-      - run: exit 1
 
   test:
     uses: suzuki-shunsuke/go-test-workflow/.github/workflows/test.yaml@d066660eecb8f8a005d498a561d1938e3a843571 # v0.4.1
