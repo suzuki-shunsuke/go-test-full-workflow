@@ -16,6 +16,10 @@ on:
       golangci-lint-timeout:
         required: false
         type: string
+      go-mod-tidy:
+        required: false
+        default: false
+        type: boolean
     secrets:
       gh_app_id:
         required: false
@@ -35,6 +39,7 @@ jobs:
       update-aqua-checksums: ${{steps.changes.outputs.update-aqua-checksums}}
       renovate-config-validator: ${{steps.changes.outputs.renovate-config-validator}}
       ghalint: ${{steps.changes.outputs.ghalint}}
+      go-mod-tidy: ${{steps.changes.outputs.go-mod-tidy}}
     runs-on: ubuntu-latest
     permissions:
       pull-requests: read # To get pull requests of private repository
@@ -56,6 +61,10 @@ jobs:
               - .github/workflows/*.yaml
               - aqua/ghalint.yaml
               - aqua/imports/ghalint.yaml
+            go-mod-tidy:
+              - go.mod
+              - go.sum
+              - "**.go"
 
   status-check:
     # This job is used for main branch's branch protection rule's status check.
@@ -95,6 +104,18 @@ jobs:
     secrets:
       gh_app_id: ${{secrets.gh_app_id}}
       gh_app_private_key: ${{secrets.gh_app_private_key}}
+
+  go-mod-tidy:
+    uses: suzuki-shunsuke/go-mod-tidy-workflow/.github/workflows/go-mod-tidy.yaml@8facac38f5b2008648c14e31c632c3a709439b9c # v0.1.1
+    if: inputs.go-mod-tidy
+    with:
+      go-version: ${{inputs.go-version}}
+      aqua_version: ${{inputs.aqua_version}}
+    secrets:
+      gh_app_id: ${{secrets.gh_app_id}}
+      gh_app_private_key: ${{secrets.gh_app_private_key}}
+    permissions:
+      contents: read
 
   renovate-config-validator:
     # Validate Renovate Configuration by renovate-config-validator.
