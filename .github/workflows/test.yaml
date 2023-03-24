@@ -103,6 +103,7 @@ jobs:
 
   go-mod-tidy:
     uses: suzuki-shunsuke/go-mod-tidy-workflow/.github/workflows/go-mod-tidy.yaml@8facac38f5b2008648c14e31c632c3a709439b9c # v0.1.1
+    needs: path-filter
     if: needs.path-filter.outputs.go-mod-tidy == 'true'
     with:
       go-version: ${{inputs.go-version}}
