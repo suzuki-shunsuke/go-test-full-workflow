@@ -15,6 +15,7 @@ jobs:
     outputs:
       update-aqua-checksums: ${{steps.changes.outputs.update-aqua-checksums}}
       renovate-config-validator: ${{steps.changes.outputs.renovate-config-validator}}
+      ghalint: ${{steps.changes.outputs.ghalint}}
     runs-on: ubuntu-latest
     permissions:
       pull-requests: read # To get pull requests of private repository
@@ -25,9 +26,13 @@ jobs:
           filters: |
             update-aqua-checksums:
               - aqua.yaml
+              - aqua/*.yaml
               - aqua-checksums.json
             renovate-config-validator:
               - renovate.json5
+            ghalint:
+              - .github/workflows/*.yaml
+              - aqua/ghalint.yaml
 
   status-check:
     # This job is used for main branch's branch protection rule's status check.
@@ -36,6 +41,7 @@ jobs:
     needs:
       - update-aqua-checksums
       - renovate-config-validator
+      - ghalint
     permissions: {}
     if: |
       ! failure() && ! cancelled() && github.event.pull_request.user.login == 'renovate[bot]' && contains(github.event.pull_request.body, ' **Automerge**: Enabled.')
@@ -44,8 +50,8 @@ jobs:
         id: generate_token
         uses: tibdex/github-app-token@021a2405c7f990db57f5eae5397423dcc554159c # v1
         with:
-          app_id: ${{secrets.gh_app_id}}
-          private_key: ${{secrets.gh_app_private_key}}
+          app_id: ${{secrets.APP_ID}}
+          app_private_key: ${{secrets.APP_PRIVATE_KEY}}
       - run: gh -R "$GITHUB_REPOSITORY" pr merge --merge --auto --delete-branch "$PR_NUMBER"
         env:
           GITHUB_TOKEN: ${{steps.generate_token.outputs.token}} # Use GitHub App to trigger GitHub Actions Workflow by merge commit.
@@ -63,8 +69,8 @@ jobs:
       aqua_version: v1.38.0
       prune: true
     secrets:
-      gh_app_id: ${{secrets.gh_app_id}}
-      gh_app_private_key: ${{secrets.gh_app_private_key}}
+      gh_app_id: ${{secrets.APP_ID}}
+      gh_app_private_key: ${{secrets.APP_PRIVATE_KEY}}
 
   renovate-config-validator:
     # Validate Renovate Configuration by renovate-config-validator.
@@ -73,3 +79,21 @@ jobs:
     if: needs.path-filter.outputs.renovate-config-validator == 'true'
     permissions:
       contents: read
+
+  ghalint:
+    # Validate GitHub Actions Workflows by ghalint.
+    needs: path-filter
+    if: needs.path-filter.outputs.ghalint == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+      - uses: aquaproj/aqua-installer@61e2563dfe7674cbf74fe6ec212e444198a3bb00 # v2.0.2
+        with:
+          aqua_version: v1.38.0
+        env:
+          AQUA_GITHUB_TOKEN: ${{github.token}}
+      - run: ghalint run
+        env:
+          GHALINT_LOG_COLOR: always
