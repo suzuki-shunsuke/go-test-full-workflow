@@ -76,6 +76,17 @@ jobs:
       - ghalint
       - go-mod-tidy
     permissions: {}
+    if: failure()
+    steps:
+      - run: exit 1
+
+  enable-automerge:
+    # This job is used for main branch's branch protection rule's status check.
+    # If all dependent jobs succeed or are skipped this job succeeds.
+    runs-on: ubuntu-latest
+    needs:
+      - status-check
+    permissions: {}
     if: |
       ! failure() && ! cancelled() && github.event.pull_request.user.login == 'renovate[bot]' && contains(github.event.pull_request.body, ' **Automerge**: Enabled.')
     steps:
