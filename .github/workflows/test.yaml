@@ -7,6 +7,9 @@ on:
       aqua_policy_config:
         required: false
         type: string
+      aqua_policy_allow:
+        required: false
+        type: boolean
       aqua_version:
         required: true
         type: string
@@ -135,6 +138,7 @@ jobs:
       - uses: aquaproj/aqua-installer@294926f94b4233f202a2f03875c604f840cfed70 # v2.1.1
         with:
           aqua_version: ${{inputs.aqua_version}}
+          policy_allow: ${{inputs.aqua_policy_allow}}
         env:
           AQUA_GITHUB_TOKEN: ${{github.token}}
       - run: ghalint run
@@ -142,9 +146,10 @@ jobs:
           GHALINT_LOG_COLOR: always
 
   test:
-    uses: suzuki-shunsuke/go-test-workflow/.github/workflows/test.yaml@d066660eecb8f8a005d498a561d1938e3a843571 # v0.4.1
+    uses: suzuki-shunsuke/go-test-workflow/.github/workflows/test.yaml@b5eca11eb556672e54d5f0ac6a4d6744630727bd # v0.4.2
     with:
       aqua_version: ${{inputs.aqua_version}}
+      aqua_policy_allow: ${{inputs.aqua_policy_allow}}
       aqua_policy_config: ${{inputs.aqua_policy_config}}
       go-version: ${{inputs.go-version}}
       golangci-lint-timeout: ${{inputs.golangci-lint-timeout}}
