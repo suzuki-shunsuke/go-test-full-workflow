@@ -4,7 +4,6 @@ name: main
 on: pull_request
 
 env:
-  AQUA_POLICY_CONFIG: ${{ github.workspace }}/aqua-policy.yaml
   AQUA_LOG_COLOR: always
 
 permissions: {}
@@ -65,7 +64,6 @@ jobs:
       contents: read # To checkout private repository
     uses: aquaproj/update-checksum-workflow/.github/workflows/update-checksum.yaml@8ced7928ac26262a50279c2f4e98261773c8b1af # v0.1.5
     with:
-      aqua_policy_config: aqua-policy.yaml
       aqua_version: v2.3.0
       prune: true
     secrets:
