@@ -84,7 +84,7 @@ jobs:
     steps:
       - run: exit 1
 
-  enable-automerge:
+  enable-auto-merge:
     # This job is used for main branch's branch protection rule's status check.
     # If all dependent jobs succeed or are skipped this job succeeds.
     runs-on: ubuntu-latest
@@ -100,6 +100,15 @@ jobs:
         with:
           app_id: ${{secrets.gh_app_id}}
           private_key: ${{secrets.gh_app_private_key}}
+          repositories: >-
+            [
+              "${{github.event.repository.name}}"
+            ]
+          permissions: >-
+            {
+              "contents": "write",
+              "pull_requests": "write"
+            }
       - run: gh -R "$GITHUB_REPOSITORY" pr merge --${{inputs.merge_method}} --auto --delete-branch "$PR_NUMBER"
         env:
           GITHUB_TOKEN: ${{steps.generate_token.outputs.token}} # Use GitHub App to trigger GitHub Actions Workflow by merge commit.
