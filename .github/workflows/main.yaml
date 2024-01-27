@@ -73,7 +73,7 @@ jobs:
       contents: read # To checkout private repository
     uses: aquaproj/update-checksum-workflow/.github/workflows/update-checksum.yaml@3598c506108a2e0e9e31a0c6ef9c202c77049420 # v0.1.9
     with:
-      aqua_version: v2.21.3
+      aqua_version: v2.22.0
       prune: true
     secrets:
       gh_app_id: ${{secrets.APP_ID}}
@@ -98,7 +98,7 @@ jobs:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - uses: aquaproj/aqua-installer@928a2ee4243a9ee8312d80dc8cbaca88fb602a91 # v2.2.0
         with:
-          aqua_version: v2.21.3
+          aqua_version: v2.22.0
         env:
           AQUA_GITHUB_TOKEN: ${{github.token}}
       - run: ghalint run
