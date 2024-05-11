@@ -130,7 +130,7 @@ jobs:
       gh_app_private_key: ${{secrets.gh_app_private_key}}
 
   go-mod-tidy:
-    uses: suzuki-shunsuke/go-mod-tidy-workflow/.github/workflows/go-mod-tidy.yaml@4e5de3de1038a745df94f46e7a3f433ce8652a7f # v1.0.0
+    uses: suzuki-shunsuke/go-mod-tidy-workflow/.github/workflows/go-mod-tidy.yaml@6795635605311526bdd23dbe7f96e6f4a33f7fd7 # v1.0.1
     needs: path-filter
     if: needs.path-filter.outputs.go-mod-tidy == 'true'
     with:
@@ -170,7 +170,7 @@ jobs:
           GHALINT_LOG_COLOR: always
 
   test:
-    uses: suzuki-shunsuke/go-test-workflow/.github/workflows/test.yaml@fd6e66427230606a7d71e686d01e3eed92ae5012 # v1.0.0
+    uses: suzuki-shunsuke/go-test-workflow/.github/workflows/test.yaml@3191fc67e2aa6426e4bccd25be69b9d80b47a007 # v1.0.1
     with:
       aqua_version: ${{inputs.aqua_version}}
       aqua_policy_allow: ${{inputs.aqua_policy_allow}}
