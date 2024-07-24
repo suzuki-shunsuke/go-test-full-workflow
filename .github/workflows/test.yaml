@@ -14,7 +14,10 @@ on:
         required: true
         type: string
       go-version:
-        required: true
+        required: false
+        type: string
+      go-version-file:
+        required: false
         type: string
       golangci-lint-timeout:
         required: false
@@ -180,6 +183,7 @@ jobs:
       aqua_policy_allow: ${{inputs.aqua_policy_allow}}
       aqua_policy_config: ${{inputs.aqua_policy_config}}
       go-version: ${{inputs.go-version}}
+      go-version-file: ${{inputs.go-version-file}}
       golangci-lint-timeout: ${{inputs.golangci-lint-timeout}}
     permissions:
       pull-requests: write
