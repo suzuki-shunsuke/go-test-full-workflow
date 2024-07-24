@@ -14,7 +14,10 @@ on:
         required: true
         type: string
       go-version:
-        required: true
+        required: false
+        type: string
+      go-version-file:
+        required: false
         type: string
       golangci-lint-timeout:
         required: false
@@ -174,12 +177,13 @@ jobs:
           GHALINT_LOG_COLOR: always
 
   test:
-    uses: suzuki-shunsuke/go-test-workflow/.github/workflows/test.yaml@3191fc67e2aa6426e4bccd25be69b9d80b47a007 # v1.0.1
+    uses: suzuki-shunsuke/go-test-workflow/.github/workflows/test.yaml@6861ea245ad10752afcba66cb71f28cf5c46ce49 # v1.1.0
     with:
       aqua_version: ${{inputs.aqua_version}}
       aqua_policy_allow: ${{inputs.aqua_policy_allow}}
       aqua_policy_config: ${{inputs.aqua_policy_config}}
       go-version: ${{inputs.go-version}}
+      go-version-file: ${{inputs.go-version-file}}
       golangci-lint-timeout: ${{inputs.golangci-lint-timeout}}
     permissions:
       pull-requests: write
