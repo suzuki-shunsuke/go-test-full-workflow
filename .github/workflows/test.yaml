@@ -22,10 +22,6 @@ on:
       golangci-lint-timeout:
         required: false
         type: string
-      merge_method:
-        required: false
-        type: string
-        default: squash
     secrets:
       gh_app_id:
         required: false
