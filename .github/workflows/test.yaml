@@ -106,6 +106,7 @@ jobs:
     if: needs.path-filter.outputs.go-mod-tidy == 'true'
     with:
       go-version: ${{inputs.go-version}}
+      go-version-file: ${{inputs.go-version-file}}
       aqua_version: ${{inputs.aqua_version}}
     secrets:
       gh_app_id: ${{secrets.gh_app_id}}
