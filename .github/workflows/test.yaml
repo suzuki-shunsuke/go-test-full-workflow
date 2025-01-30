@@ -1,48 +1,28 @@
 ---
 name: test
-
 on:
   workflow_call:
     inputs:
-      aqua_policy_config:
-        required: false
-        type: string
-      aqua_policy_allow:
-        required: false
-        type: string
       aqua_version:
         required: true
         type: string
-      go-version:
-        required: false
-        type: string
       go-version-file:
         required: false
+        default: go.mod
         type: string
       golangci-lint-timeout:
         required: false
         type: string
-    secrets:
-      gh_app_id:
-        required: false
-      gh_app_private_key:
-        required: false
-
 env:
-  AQUA_POLICY_CONFIG: ${{inputs.aqua_policy_config}}
   AQUA_LOG_COLOR: always
-
 permissions: {}
-
 jobs:
   path-filter:
     # Get changed files to filter jobs
     timeout-minutes: 10
     outputs:
-      update-aqua-checksums: ${{steps.changes.outputs.update-aqua-checksums}}
       renovate-config-validator: ${{steps.changes.outputs.renovate-config-validator}}
       ghalint: ${{steps.changes.outputs.ghalint}}
-      go-mod-tidy: ${{steps.changes.outputs.go-mod-tidy}}
     runs-on: ubuntu-latest
     permissions:
       pull-requests: read # To get pull requests of private repository
@@ -51,23 +31,12 @@ jobs:
         id: changes
         with:
           filters: |
-            update-aqua-checksums:
-              - aqua.yaml
-              - aqua/*.yaml
-              - aqua-checksums.json
-              - aqua/aqua.yaml
-              - aqua/imports/*.yaml
-              - aqua/aqua-checksums.json
             renovate-config-validator:
               - renovate.json5
             ghalint:
               - .github/workflows/*.yaml
               - aqua/ghalint.yaml
               - aqua/imports/ghalint.yaml
-            go-mod-tidy:
-              - go.mod
-              - go.sum
-              - "**.go"
 
   status-check:
     # This job is used for main branch's branch protection rule's status check.
@@ -75,44 +44,13 @@ jobs:
     timeout-minutes: 10
     runs-on: ubuntu-latest
     needs:
-      - update-aqua-checksums
       - test
       - renovate-config-validator
       - ghalint
-      - go-mod-tidy
     permissions: {}
     if: failure()
     steps:
       - run: exit 1
-
-  update-aqua-checksums:
-    # Update aqua-checksums.json and push a commit
-    needs: path-filter
-    if: needs.path-filter.outputs.update-aqua-checksums == 'true'
-    permissions:
-      contents: read # To checkout private repository
-    uses: aquaproj/update-checksum-workflow/.github/workflows/update-checksum.yaml@8bce60cc4475128360bc32f00707abb874ca4a91 # v1.0.3
-    with:
-      aqua_policy_config: ${{inputs.aqua_policy_config}}
-      aqua_version: ${{inputs.aqua_version}}
-      prune: true
-    secrets:
-      gh_app_id: ${{secrets.gh_app_id}}
-      gh_app_private_key: ${{secrets.gh_app_private_key}}
-
-  go-mod-tidy:
-    uses: suzuki-shunsuke/go-mod-tidy-workflow/.github/workflows/go-mod-tidy.yaml@79af8ebcd2dea45c27303b09192be80f7a35a37a # v1.1.0
-    needs: path-filter
-    if: needs.path-filter.outputs.go-mod-tidy == 'true'
-    with:
-      go-version: ${{inputs.go-version}}
-      go-version-file: ${{inputs.go-version-file}}
-      aqua_version: ${{inputs.aqua_version}}
-    secrets:
-      gh_app_id: ${{secrets.gh_app_id}}
-      gh_app_private_key: ${{secrets.gh_app_private_key}}
-    permissions:
-      contents: read
 
   renovate-config-validator:
     # Validate Renovate Configuration by renovate-config-validator.
@@ -137,7 +75,6 @@ jobs:
       - uses: aquaproj/aqua-installer@e2d0136abcf70b7a2f6f505720640750557c4b33 # v3.1.1
         with:
           aqua_version: ${{inputs.aqua_version}}
-          policy_allow: ${{inputs.aqua_policy_allow}}
         env:
           AQUA_GITHUB_TOKEN: ${{github.token}}
       - run: ghalint run
@@ -148,9 +85,6 @@ jobs:
     uses: suzuki-shunsuke/go-test-workflow/.github/workflows/test.yaml@6861ea245ad10752afcba66cb71f28cf5c46ce49 # v1.1.0
     with:
       aqua_version: ${{inputs.aqua_version}}
-      aqua_policy_allow: ${{inputs.aqua_policy_allow}}
-      aqua_policy_config: ${{inputs.aqua_policy_config}}
-      go-version: ${{inputs.go-version}}
       go-version-file: ${{inputs.go-version-file}}
       golangci-lint-timeout: ${{inputs.golangci-lint-timeout}}
     permissions:
