@@ -37,22 +37,16 @@ jobs:
   status-check:
     # This job is used for main branch's branch protection rule's status check.
     # If all dependent jobs succeed or are skipped this job succeeds.
-    timeout-minutes: 30
-    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    runs-on: ubuntu-24.04
     needs:
       - update-aqua-checksums
       - renovate-config-validator
       - ghalint
     permissions: {}
-    if: |
-      ! failure() && ! cancelled() && github.event.pull_request.user.login == 'renovate[bot]' && contains(github.event.pull_request.body, ' **Automerge**: Enabled.')
+    if: failure()
     steps:
-      - uses: suzuki-shunsuke/enable-auto-merge-action@ec074392e76cd1062925255cd82a86ea1c44b6fd # v0.1.0
-        with:
-          pr_number: ${{github.event.pull_request.number}}
-          merge_method: squash
-          github_app_id: ${{secrets.APP_ID}}
-          github_app_private_key: ${{secrets.APP_PRIVATE_KEY}}
+      - run: exit 1
 
   update-aqua-checksums:
     # Update aqua-checksums.json and push a commit
