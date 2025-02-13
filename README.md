@@ -9,14 +9,13 @@ GitHub Actions Reusable Workflow to test Go application
 name: test
 on:
   pull_request: {}
-permissions: {}
 jobs:
   test:
-    uses: suzuki-shunsuke/go-test-full-workflow/.github/workflows/test.yaml@0b7604aaf8c1b30f7b9cd2d79687daf39856b3f8 # v0.1.3
+    uses: suzuki-shunsuke/go-test-full-workflow/.github/workflows/test.yaml@98b1d118f22667c10788ac678906b0caef8909ba # v2.0.0
     with:
       aqua_policy_config: aqua-policy.yaml
-      aqua_version: v1.36.0
-      go-version: 1.20.2
+      aqua_version: v2.44.0
+      go-version: 1.24.0
     secrets:
       gh_app_id: ${{secrets.APP_ID}}
       gh_app_private_key: ${{secrets.APP_PRIVATE_KEY}}
@@ -28,13 +27,13 @@ jobs:
 ## Requirements
 
 ```sh
-aqua g -i int128/ghcp golangci/golangci-lint reviewdog/reviewdog suzuki-shunsuke/ghalint
+aqua g -i golangci/golangci-lint reviewdog/reviewdog suzuki-shunsuke/ghalint
 ```
 
 GitHub App
 
-* `contents: write`: To update aqua-checksums.json and merge pull requests
-* `pull-requests: write`: To enable automerge
+- `contents: write`: To update aqua-checksums.json and merge pull requests
+- `pull-requests: write`: To enable automerge
 
 ## LICENSE
 
