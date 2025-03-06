@@ -38,20 +38,6 @@ jobs:
               - aqua/ghalint.yaml
               - aqua/imports/ghalint.yaml
 
-  status-check:
-    # This job is used for main branch's branch protection rule's status check.
-    # If all dependent jobs succeed or are skipped this job succeeds.
-    timeout-minutes: 10
-    runs-on: ubuntu-latest
-    needs:
-      - test
-      - renovate-config-validator
-      - ghalint
-    permissions: {}
-    if: failure()
-    steps:
-      - run: exit 1
-
   renovate-config-validator:
     # Validate Renovate Configuration by renovate-config-validator.
     uses: suzuki-shunsuke/renovate-config-validator-workflow/.github/workflows/validate.yaml@e8effbd185cbe3874cddef63f48b8bdcfc9ada55 # v0.2.4
