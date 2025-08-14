@@ -27,7 +27,7 @@ jobs:
 ## Requirements
 
 ```sh
-aqua g -i golangci/golangci-lint reviewdog/reviewdog suzuki-shunsuke/ghalint
+aqua g -i golangci/golangci-lint reviewdog/reviewdog suzuki-shunsuke/ghalint crate-ci/typos
 ```
 
 GitHub App
