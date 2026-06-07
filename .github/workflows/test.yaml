@@ -82,6 +82,7 @@ jobs:
     permissions:
       pull-requests: write
       contents: read
+      id-token: write
 
   typos:
     timeout-minutes: 10
