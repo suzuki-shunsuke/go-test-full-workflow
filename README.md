@@ -17,6 +17,8 @@ jobs:
     with:
       aqua_version: v2.59.1
       go-version-file: go.mod
+    secrets:
+      TAKUMI_GUARD_BOT_ID: ${{secrets.TAKUMI_GUARD_BOT_ID}} # Optional. https://github.com/flatt-security/setup-takumi-guard-golang
     permissions:
       pull-requests: write
       contents: read # To checkout private repository
