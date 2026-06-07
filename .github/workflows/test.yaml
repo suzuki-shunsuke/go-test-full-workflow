@@ -13,6 +13,9 @@ on:
       golangci-lint-timeout:
         required: false
         type: string
+    secrets:
+      TAKUMI_GUARD_BOT_ID:
+        required: false
 env:
   AQUA_LOG_COLOR: always
 permissions: {}
@@ -69,11 +72,13 @@ jobs:
           AQUA_GITHUB_TOKEN: ${{github.token}}
 
   test:
-    uses: suzuki-shunsuke/go-test-workflow/.github/workflows/test.yaml@7df1c23f3302998da64992b79ffd05166e1fe2f1 # v2.0.2
+    uses: suzuki-shunsuke/go-test-workflow/.github/workflows/test.yaml@main
     with:
       aqua_version: ${{inputs.aqua_version}}
       go-version-file: ${{inputs.go-version-file}}
       golangci-lint-timeout: ${{inputs.golangci-lint-timeout}}
+    secrets:
+      TAKUMI_GUARD_BOT_ID: ${{secrets.TAKUMI_GUARD_BOT_ID}}
     permissions:
       pull-requests: write
       contents: read
