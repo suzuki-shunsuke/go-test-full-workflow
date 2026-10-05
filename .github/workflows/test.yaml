@@ -26,7 +26,7 @@ jobs:
     outputs:
       renovate-config-validator: ${{steps.changes.outputs.renovate-config-validator}}
       ghalint: ${{steps.changes.outputs.ghalint}}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       pull-requests: read # To get pull requests of private repository
     steps:
@@ -54,18 +54,16 @@ jobs:
     timeout-minutes: 15
     needs: path-filter
     if: needs.path-filter.outputs.ghalint == 'true'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: aquaproj/aqua-installer@96a9bc20066c5bf5e275b41019cfc165b25f4e2e # v4.0.5
+      - uses: $/actions/install
         with:
           aqua_version: ${{inputs.aqua_version}}
-        env:
-          AQUA_GITHUB_TOKEN: ${{github.token}}
       - run: ghalint run
         env:
           GHALINT_LOG_COLOR: always
@@ -86,18 +84,16 @@ jobs:
 
   typos:
     timeout-minutes: 10
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: aquaproj/aqua-installer@96a9bc20066c5bf5e275b41019cfc165b25f4e2e # v4.0.5
+      - uses: $/actions/install
         with:
           aqua_version: ${{inputs.aqua_version}}
-        env:
-          AQUA_GITHUB_TOKEN: ${{github.token}}
       - run: typos -V
         env:
           AQUA_GITHUB_TOKEN: ${{github.token}}
