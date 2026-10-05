@@ -35,6 +35,7 @@ jobs:
         with:
           filters: |
             renovate-config-validator:
+              - renovate.json
               - renovate.json5
             ghalint:
               - .github/workflows/*.yaml
@@ -70,7 +71,7 @@ jobs:
           AQUA_GITHUB_TOKEN: ${{github.token}}
 
   test:
-    uses: suzuki-shunsuke/go-test-workflow/.github/workflows/test.yaml@e4a6f39787693836acec47f5dc2e373a84aa6d14 # v3.1.0
+    uses: suzuki-shunsuke/go-test-workflow/.github/workflows/test.yaml@fix-permissions
     with:
       aqua_version: ${{inputs.aqua_version}}
       go-version-file: ${{inputs.go-version-file}}
