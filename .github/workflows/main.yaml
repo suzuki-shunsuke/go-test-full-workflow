@@ -4,7 +4,7 @@ on: pull_request
 permissions: {}
 jobs:
   status-check:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     if: always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled'))
     timeout-minutes: 10
     permissions: {}
@@ -13,6 +13,7 @@ jobs:
     steps:
       - run: exit 1
   test:
-    uses: ./.github/workflows/workflow_call_test.yaml
+    uses: $/.github/workflows/test.yaml
     permissions:
       contents: read
+      pull-requests: write
