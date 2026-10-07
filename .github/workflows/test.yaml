@@ -32,7 +32,7 @@ jobs:
       id-token: write
 
   test:
-    uses: suzuki-shunsuke/go-test-workflow/.github/workflows/test.yaml@f0dafddd9f9075a33e4ff40a44bdabd79335e7a3 # v3.1.1
+    uses: suzuki-shunsuke/test-workflow/.github/workflows/test.yaml@51ece8dcaabff59820bfb2053c56e3cb281cf7b2 # v0.0.1
     with:
       aqua_version: ${{inputs.aqua_version}}
     permissions:
