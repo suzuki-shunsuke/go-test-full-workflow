@@ -14,7 +14,7 @@ jobs:
   test:
     uses: suzuki-shunsuke/go-test-full-workflow/.github/workflows/test.yaml@596bc52a7f02dd896d3351e61e4dfa661c1f3304 # v5.0.1
     with:
-      aqua_version: v2.63.0
+      aqua_version: v2.64.0
       go-version-file: go.mod
     secrets:
       TAKUMI_GUARD_BOT_ID: ${{secrets.TAKUMI_GUARD_BOT_ID}} # Optional. https://github.com/flatt-security/setup-takumi-guard-golang
