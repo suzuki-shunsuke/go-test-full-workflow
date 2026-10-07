@@ -72,7 +72,7 @@ jobs:
           AQUA_GITHUB_TOKEN: ${{github.token}}
 
   test:
-    uses: suzuki-shunsuke/go-test-workflow/.github/workflows/test.yaml@e4a6f39787693836acec47f5dc2e373a84aa6d14 # v3.1.0
+    uses: suzuki-shunsuke/go-test-workflow/.github/workflows/test.yaml@f0dafddd9f9075a33e4ff40a44bdabd79335e7a3 # v3.1.1
     with:
       aqua_version: ${{inputs.aqua_version}}
       go-version-file: ${{inputs.go-version-file}}
