@@ -13,6 +13,10 @@ jobs:
     steps:
       - run: exit 1
   test:
-    uses: ./.github/workflows/workflow_call_test.yaml
+    uses: $/.github/workflows/test.yaml
+    with:
+      aqua_version: v2.64.0
     permissions:
       contents: read
+      pull-requests: write
+      id-token: write
