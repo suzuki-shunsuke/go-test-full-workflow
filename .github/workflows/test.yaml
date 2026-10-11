@@ -13,17 +13,24 @@ on:
       golangci-lint-timeout:
         required: false
         type: string
+      gomodule_artifact_name:
+        # The name of the artifact created by suzuki-shunsuke/download-go-module-action in the caller workflow.
+        # If this is set, go-test-workflow doesn't download Go modules and uses the artifact instead.
+        # The artifact must include go-licenses (aqua_packages: go-licenses).
+        required: false
+        type: string
     secrets:
       TAKUMI_GUARD_BOT_ID:
         required: false
 permissions: {}
 jobs:
   go:
-    uses: suzuki-shunsuke/go-test-workflow/.github/workflows/test.yaml@f0dafddd9f9075a33e4ff40a44bdabd79335e7a3 # v3.1.1
+    uses: suzuki-shunsuke/go-test-workflow/.github/workflows/test.yaml@0579cca5234fc2cab020d03a24a3691ba4c9468a # v3.2.0
     with:
       aqua_version: ${{inputs.aqua_version}}
       go-version-file: ${{inputs.go-version-file}}
       golangci-lint-timeout: ${{inputs.golangci-lint-timeout}}
+      gomodule_artifact_name: ${{inputs.gomodule_artifact_name}}
     secrets:
       TAKUMI_GUARD_BOT_ID: ${{secrets.TAKUMI_GUARD_BOT_ID}}
     permissions:
