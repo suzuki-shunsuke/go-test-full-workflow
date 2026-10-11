@@ -19,7 +19,7 @@ on:
 permissions: {}
 jobs:
   go:
-    uses: suzuki-shunsuke/go-test-workflow/.github/workflows/test.yaml@f0dafddd9f9075a33e4ff40a44bdabd79335e7a3 # v3.1.1
+    uses: suzuki-shunsuke/go-test-workflow/.github/workflows/test.yaml@e32dc90fad1c9eb74d5844498c83a34ac81eed53 # feat/parallel-lint-test
     with:
       aqua_version: ${{inputs.aqua_version}}
       go-version-file: ${{inputs.go-version-file}}
