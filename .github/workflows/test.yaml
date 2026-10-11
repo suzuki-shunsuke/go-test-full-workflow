@@ -25,7 +25,7 @@ on:
 permissions: {}
 jobs:
   go:
-    uses: suzuki-shunsuke/go-test-workflow/.github/workflows/test.yaml@2480e3970012083b2d2839a8c38d0a0279909a2a # ci/download-go-module-action
+    uses: suzuki-shunsuke/go-test-workflow/.github/workflows/test.yaml@a1895416ec8ae2c4655a2879a06658d500e74462 # ci/download-go-module-action
     with:
       aqua_version: ${{inputs.aqua_version}}
       go-version-file: ${{inputs.go-version-file}}
